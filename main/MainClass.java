@@ -47,9 +47,12 @@ public class MainClass {
 		}
 		
 		while((incomingChannels>0) && thisNode.getNodeId() != 0){
-			Socket sock = serverSocket.accept();
+			Socket sock = serverSocket.accept();			
 			ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 			Message msg = (Message) (ois.readObject());
+
+			System.out.println("["+thisNode.getNodeId()+"]"+"received"+msg.getMessage()+"from"+msg.getSourceNode().getNodeId());
+			
 			setupChannel(sock, msg.getSourceNode().getNodeId());
 			
 			if(channelSetupFlag == false){
@@ -59,6 +62,8 @@ public class MainClass {
 		}
 		
 		if(thisNode.getNodeId() == 0){
+			//I think here is the problem, 
+			//code on Node 0 has to be deployed in the end but looks like it's not the case here
 			sendConnectionMsg();
 		}
 		
@@ -67,7 +72,7 @@ public class MainClass {
 	}
 	
 	//setup a channel when a new client (lower Node Id) connects to my server Socket
-	//when I becomes client for my neighbours (higher node UD) 
+	//when I become client for my neighbours (higher node UD) 
 	static void setupChannel(Socket sock, int nodeId) throws IOException, ClassNotFoundException{
 		ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 		//1) store output stream for this channel corresponding to this node id
@@ -89,6 +94,9 @@ public class MainClass {
 			if(key > thisNode.getNodeId()){
 				m.setDestinationNode(thisNode.getNeighbours().get(key));
 				Socket sock = new Socket(thisNode.getNeighbours().get(key).getHostName(), thisNode.getNeighbours().get(key).getPort());
+				ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
+				oos.writeObject(m);
+				System.out.println("["+thisNode.getNodeId()+"]"+"sending"+m.getMessage()+"to"+m.getDestinationNode().getNodeId());
 				setupChannel(sock, thisNode.getNeighbours().get(key).getNodeId());
 			}
 		}
