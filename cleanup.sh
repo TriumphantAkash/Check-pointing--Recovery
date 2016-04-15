@@ -15,7 +15,7 @@ cat $CONFIG | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
     do
         host=$( echo $line | awk '{ print $2 }' )
 
-        #echo $host
+        echo $host
         #ssh $netid@$host killall -u $netid &
         ssh -o StrictHostKeyChecking=no $netid@$host "ps -u $USER | grep java | tr -s ' ' | cut -f1 -d' ' | xargs kill " &
         ssh -o StrictHostKeyChecking=no $netid@$host "ps -fu $USER | grep java | tr -s ' ' | cut -f2 -d' ' | xargs kill " &
