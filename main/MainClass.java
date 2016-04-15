@@ -34,8 +34,13 @@ public class MainClass {
 		File f = new File(args[1]);
 		ConfigParser.readConfig(f);
 		
+		System.out.println("my neighbours: ");
+		for(Integer key: thisNode.getNeighbours().keySet()){
+			System.out.print(key+ "  ");
+		}
 		//this node has all the required data in it now
 		ServerSocket serverSocket = new ServerSocket(thisNode.getPort());
+		System.out.println("Server Started fo node:" +thisNode.getNodeId()+ " With port ID : " +thisNode.getPort());
 		
 		//optimize this while true
 		//because it needs to run only for making new channels
@@ -47,7 +52,9 @@ public class MainClass {
 		}
 		
 		while((incomingChannels>0) && thisNode.getNodeId() != 0){
-			Socket sock = serverSocket.accept();			
+			System.out.println(thisNode.getNodeId()+ " is waiting at dotAccept");
+			Socket sock = serverSocket.accept();
+			System.out.println("getting away from dotAccept");
 			ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 			Message msg = (Message) (ois.readObject());
 
@@ -68,7 +75,7 @@ public class MainClass {
 		}
 		
 		
-		
+	serverSocket.close();	
 	}
 	
 	//setup a channel when a new client (lower Node Id) connects to my server Socket
@@ -92,8 +99,11 @@ public class MainClass {
 		m.setSourceNode(thisNode);
 		for(Integer key: thisNode.getNeighbours().keySet()){
 			if(key > thisNode.getNodeId()){
+				
 				m.setDestinationNode(thisNode.getNeighbours().get(key));
+				System.out.println(thisNode.getNodeId()+" is trying to connect to" +key+ "Hostname: " +thisNode.getNeighbours().get(key).getHostName()+ " Port number: " +thisNode.getNeighbours().get(key).getPort());
 				Socket sock = new Socket(thisNode.getNeighbours().get(key).getHostName(), thisNode.getNeighbours().get(key).getPort());
+				System.out.println("trying to send the message from " +thisNode.getNodeId()+ "to " +thisNode.getNeighbours().get(key).getNodeId());
 				ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 				oos.writeObject(m);
 				System.out.println("["+thisNode.getNodeId()+"]"+"sending"+m.getMessage()+"to"+m.getDestinationNode().getNodeId());

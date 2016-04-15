@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import main.MainClass;
 import models.Node;
@@ -29,12 +30,24 @@ public class ConfigParser {
 		for(int i = 1;i<=MainClass.thisNode.getTotalNodes();i++){
 			String line1 = br.readLine();
 			String[] words1 = line1.split("\\s+");
+			
+			if(Integer.parseInt(words1[0]) == MainClass.thisNode.getNodeId()){
+				MainClass.thisNode.setHostName(words1[1]);
+				MainClass.thisNode.setPort(Integer.parseInt(words1[2]));
+			}else{
+			
 			Node n = new Node();
 			n.setNodeId(Integer.parseInt(words1[0]));
 			n.setHostName(words1[1]);
 			n.setPort(Integer.parseInt(words1[2]));;
 			tempHashMap.put(n.getNodeId(), n);
+			}
 		}
+		
+		for(Entry<Integer, Node> e: tempHashMap.entrySet()){
+			System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"tempHashMap entries: " + e.getKey()+ "and "+e.getValue().getHostName()+ " "+e.getValue().getPort());
+		}
+		
 		
 		for(int i = 1; i <=MainClass.thisNode.getNodeId(); i++){
 			String line2 = br.readLine();
