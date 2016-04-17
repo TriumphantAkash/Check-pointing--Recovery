@@ -45,7 +45,7 @@ public class ConfigParser {
 		}
 		
 		for(Entry<Integer, Node> e: tempHashMap.entrySet()){
-			System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"tempHashMap entries: " + e.getKey()+ "and "+e.getValue().getHostName()+ " "+e.getValue().getPort());
+			//System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"tempHashMap entries: " + e.getKey()+ "and "+e.getValue().getHostName()+ " "+e.getValue().getPort());
 		}
 		
 		
