@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import models.Message.REBmode;
+
 public class Node implements Serializable{
 	private int nodeId;
 	private String hostName;
 	private int port;
-	private REBmode rebMode;
+	private REBmode rebMode = REBmode.PASSIVE;
 	private int totalMessageSent;
 	private HashMap<Integer, Node> neighbours = new HashMap<Integer, Node>();
 	private static int totalNodes;
@@ -16,6 +18,7 @@ public class Node implements Serializable{
 	private static int maxNumber;	//maximum number of message that a node needs to send before becoming permanently passive
 	private static int maxPerActive;	//maximum number of neighbours to which messages this node will send
 
+	
 	public static int getTotalNodes() {
 		return totalNodes;
 	}

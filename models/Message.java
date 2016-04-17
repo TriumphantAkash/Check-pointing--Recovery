@@ -7,7 +7,7 @@ public class Message implements Serializable{
 		private String message;
 		private Node sourceNode;
 		private Node destinationNode;
-		
+		private REBmode rebMode;
 		
 		public String getMessage() {
 			return message;
@@ -28,5 +28,16 @@ public class Message implements Serializable{
 			this.destinationNode = destinationNode;
 		}
 		
-		
+		public REBmode getRebMode() {
+			return rebMode;
+		}
+		public void setRebMode(REBmode rebMode) {
+			this.rebMode = rebMode;
+		}
+
+
+
+		public enum REBmode {
+		    ACTIVE, PASSIVE 
+		}
 }

@@ -10,26 +10,38 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import utilities.ConfigParser;
 import models.Message;
 import models.Node;
+import models.Node.REBmode;
 import threads.ListenerThread;
+import threads.WriterThread;
 
 public class MainClass {
 
 	private static boolean isOutgoingChannelSetup = false;
-	private static BlockingQueue<Message> queue = null;
+	private static BlockingQueue<Message> LMqueue = null;
+	private static BlockingQueue<String> MWqueue = null;
+	private static int numberOfSentMessages = 0;
+	private static final int MAX_MSG_NUMBER = 10;//later set number of msg sent using configparser
 	
 	public static Node thisNode;
+	private static final Lock _mutex = new ReentrantLock(true);
 	
 	public static HashMap<Integer, ObjectOutputStream> neighbourOOS = new HashMap<Integer, ObjectOutputStream>();
 
-	public static void main(String[] args) throws IOException, ClassNotFoundException {
+	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 		thisNode = new Node();
 		thisNode.setNodeId(Integer.parseInt(args[0]));
 		
-		queue = new ArrayBlockingQueue<Message>(1000);
+		LMqueue = new ArrayBlockingQueue<Message>(1000);
+		MWqueue = new ArrayBlockingQueue<String>(10);
+		
+		WriterThread writerThread = new WriterThread(MWqueue);
+		writerThread.start();
 		
 		File f = new File(args[1]);
 		ConfigParser.readConfig(f);
@@ -66,15 +78,52 @@ public class MainClass {
 			}
 			incomingChannels--;
 		}
+		serverSocket.close();
 		
 		if(thisNode.getNodeId() == 0){
-			//I think here is the problem, 
-			//code on Node 0 has to be deployed in the end but looks like it's not the case here
 			sendConnectionMsg();
+			
+			_mutex.lock();
+			
+			System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" got REB mode in "+ MainClass.thisNode.getREBmode());
+			if(MainClass.thisNode.getREBmode() == REBmode.PASSIVE){
+				//set mode in Message as PASSIVE state
+				
+				MainClass.thisNode.setREBmode(REBmode.ACTIVE);
+				System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"changed REB mode from PASSIVE to ACTIVE (If condition)");
+			}else {
+				System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" not possible.. something is wrong");
+			}
+			
+			_mutex.unlock();
+			
+			try {
+				MWqueue.put("nod");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//this is node 0 (we are assumig that only node 0 is active in the beginning)
+			}
+		
+		//starting REB protocol i.e. listen at LMqueu and take corresponding action when new message arrives 
+		while(true){
+			//listen to blocking queue from Listener Thread	
+			Message message = LMqueue.take();
+			if(message.getRebMode() == Message.REBmode.ACTIVE){
+				System.out.println("need to do checkpoint protocol stuff");
+				System.out.println("*************************************");
+			} else {
+				if(numberOfSentMessages < MAX_MSG_NUMBER){
+					MWqueue.put("nod");
+					numberOfSentMessages++;
+				}
+				System.out.println("need to do checkpoint protocol stuff");
+				System.out.println("*************************************");
+			}
 		}
 		
-		
-	serverSocket.close();	
 	}
 	
 	//setup a channel when a new client (lower Node Id) connects to my server Socket
@@ -101,7 +150,7 @@ public class MainClass {
 			ois = new ObjectInputStream(sock.getInputStream());
 			//System.out.println("["+thisNode.getNodeId()+"]"+"got the inutstream");
 			//System.out.println("["+thisNode.getNodeId()+"]"+"going to create listener thread"); 
-			ListenerThread listenerThread = new ListenerThread(ois, queue);
+			ListenerThread listenerThread = new ListenerThread(ois, LMqueue);
 			listenerThread.start();
 			System.out.println("["+thisNode.getNodeId()+"]"+" is listening for incoming msgs from "+ nodeId + "!");
 		} catch (IOException e) {
