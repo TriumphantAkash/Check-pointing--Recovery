@@ -26,23 +26,26 @@ public class ListenerThread extends Thread{
 	@Override
 	public void run() {
 		try {
-			Message message = (Message)ois.readObject();
-			if(message.getMessage().equalsIgnoreCase("Application")){
-				_mutex.lock();
-				
-				System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" got REB mode in "+ MainClass.thisNode.getREBmode());
-				if(MainClass.thisNode.getREBmode() == REBmode.PASSIVE){
-					//set mode in Message as PASSIVE state
-					message.setRebMode(models.Message.REBmode.PASSIVE);
-					MainClass.thisNode.setREBmode(REBmode.ACTIVE);
-					System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"changed REB mode from PASSIVE to ACTIVE (If condition)");
-				}else {
-					message.setRebMode(models.Message.REBmode.ACTIVE);
+			while(true){
+				Message message = (Message)ois.readObject();
+				if(message.getMessage().equalsIgnoreCase("Application")){
+					_mutex.lock();
+					System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"got an [Application_msg] from "+ message.getSourceNode().getNodeId());
+					System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" got REB mode in "+ MainClass.thisNode.getREBmode());
+					if(MainClass.thisNode.getREBmode() == REBmode.PASSIVE){
+						//set mode in Message as PASSIVE state
+						message.setRebMode(models.Message.REBmode.PASSIVE);
+						MainClass.thisNode.setREBmode(REBmode.ACTIVE);
+						System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"changed REB mode from PASSIVE to ACTIVE (If condition)");
+					}else {
+						message.setRebMode(models.Message.REBmode.ACTIVE);
+					}
+					
+					_mutex.unlock();
+					
+					queue.put(message);
+					System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"wrote [Application_msg] from "+ message.getSourceNode().getNodeId()+ "to LMqueue");
 				}
-				
-				_mutex.unlock();
-				
-				queue.put(message);
 			}
 			
 		} catch (ClassNotFoundException | IOException | InterruptedException e) {

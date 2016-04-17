@@ -26,7 +26,7 @@ public class MainClass {
 	private static BlockingQueue<Message> LMqueue = null;
 	private static BlockingQueue<String> MWqueue = null;
 	private static int numberOfSentMessages = 0;
-	private static final int MAX_MSG_NUMBER = 10;//later set number of msg sent using configparser
+	private static final int MAX_MSG_NUMBER = 100;//later set number of msg sent using configparser
 	
 	public static Node thisNode;
 	private static final Lock _mutex = new ReentrantLock(true);
@@ -83,9 +83,10 @@ public class MainClass {
 		if(thisNode.getNodeId() == 0){
 			sendConnectionMsg();
 			
+			Thread.sleep(5000); // so that all 
 			_mutex.lock();
 			
-			System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" got REB mode in "+ MainClass.thisNode.getREBmode());
+			System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" Main Thread got REB mode in "+ MainClass.thisNode.getREBmode());
 			if(MainClass.thisNode.getREBmode() == REBmode.PASSIVE){
 				//set mode in Message as PASSIVE state
 				
@@ -98,6 +99,7 @@ public class MainClass {
 			_mutex.unlock();
 			
 			try {
+				
 				MWqueue.put("nod");
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -111,16 +113,21 @@ public class MainClass {
 		while(true){
 			//listen to blocking queue from Listener Thread	
 			Message message = LMqueue.take();
+			System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"Main Thread read [Application_msg] from source"+ message.getSourceNode().getNodeId() + "from LMqueue");
 			if(message.getRebMode() == Message.REBmode.ACTIVE){
-				System.out.println("need to do checkpoint protocol stuff");
-				System.out.println("*************************************");
+				System.out.println("need to do checkpoint protocol stuff(don't need to send messages now)");
+				System.out.println("*********************************************************************");
 			} else {
 				if(numberOfSentMessages < MAX_MSG_NUMBER){
+					
 					MWqueue.put("nod");
 					numberOfSentMessages++;
+					System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"number of messages sent by now: "+ numberOfSentMessages + "yo bitches ....");
+					
 				}
-				System.out.println("need to do checkpoint protocol stuff");
-				System.out.println("*************************************");
+				System.out.println("need to do checkpoint protocol stuff (else/still need to send msgs)");
+				System.out.println("*******************************************************************");
+				System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"Main THread wrote [Application_msg] from "+ message.getSourceNode().getNodeId()+ "to MWqueue");
 			}
 		}
 		

@@ -24,12 +24,16 @@ public class WriterThread extends Thread{
 		while(true){
 			try {
 				String str = queue.take();
+				System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"Writer Thread read got a 'nod' from MainTHread in its MWqueue");
+				
 				int r = 0;
 				if(str.equals("nod")){
 					//1) generate random number to pick number of neighbours to send application msg to (suppose this ransom # is r)
 					int n = MainClass.thisNode.getNeighbours().size();
 					Random rand = new Random();
-					r = r + rand.nextInt((n - 1) + 1);
+					r = 1 + rand.nextInt(n - 1 + 1);
+					System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in WriteThread, got generated value of r as: "+ r);
+					
 					//2) select r neighbours from the neighbour list randomly and send application msg to them
 					ArrayList<Integer> list = new ArrayList<Integer>();
 					
@@ -39,15 +43,18 @@ public class WriterThread extends Thread{
 					
 					Collections.shuffle(list);
 					
-					//take first r nodeIds from list and send application msg to them
+					//create application message
 					Message msg = new Message();
 					msg.setSourceNode(MainClass.thisNode);
 					msg.setMessage("Application");
 					
+					//take first r nodeIds from list and send application msg to them					
 					for(int i = 0; i<r;i++){
 						int nodeId = list.get(i);
+						System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thrad, sending [Application_msg] to : "+ nodeId);
+						//System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thread, the output stream for neighbour : "+ nodeId + "is : ***********"+ MainClass.neighbourOOS.get(nodeId));
 						MainClass.neighbourOOS.get(nodeId).writeObject(msg);
-						Thread.sleep(200);
+						Thread.sleep(10);
 					}
 					
 					_mutex.lock();
