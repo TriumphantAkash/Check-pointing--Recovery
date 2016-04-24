@@ -169,7 +169,7 @@ public class MainClass {
 	}
 
 	
-	static void sendConnectionMsg() throws UnknownHostException, IOException, ClassNotFoundException{
+	static void sendConnectionMsg() throws UnknownHostException, ClassNotFoundException{
 		isOutgoingChannelSetup = true;
 		Message m = new Message();
 		m.setMessage("connection");
@@ -178,13 +178,18 @@ public class MainClass {
 			//System.out.println(thisNode.getNodeId()+" took out his neighbour" +key+ "Hostname: " +thisNode.getNeighbours().get(key).getHostName()+ " Port number: " +thisNode.getNeighbours().get(key).getPort());
 			if(key > thisNode.getNodeId()){
 				m.setDestinationNode(thisNode.getNeighbours().get(key));
+				
 				//System.out.println(thisNode.getNodeId()+" is trying to connect to" +key+ "Hostname: " +thisNode.getNeighbours().get(key).getHostName()+ " Port number: " +thisNode.getNeighbours().get(key).getPort());
+				try{
 				Socket sock = new Socket(thisNode.getNeighbours().get(key).getHostName(), thisNode.getNeighbours().get(key).getPort());
 				//System.out.println("trying to send the message from " +thisNode.getNodeId()+ "to " +thisNode.getNeighbours().get(key).getNodeId());
 				ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 				oos.writeObject(m);
 				//System.out.println("["+thisNode.getNodeId()+"]"+"sending"+m.getMessage()+"to"+m.getDestinationNode().getNodeId());
 				setupChannel(sock,key);
+			}catch(IOException e){
+				System.out.println("exception while ["+thisNode.getNodeId()+"]"+" tries to create socket with "+ key);
+			}
 			}
 		}
 	}
