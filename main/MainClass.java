@@ -46,6 +46,18 @@ public class MainClass {
 		File f = new File(args[1]);
 		ConfigParser.readConfig(f);
 		
+		//initialize vector clock
+		for(int i=0;i<thisNode.getTotalNodes();i++){
+			thisNode.getVectorClock().add(0);
+		}
+		
+		//initialize SEND and RECEIVE vector
+		for(Integer key: thisNode.getNeighbours().keySet()){
+			thisNode.getSENT_VECTOR().put(key, 0);
+			thisNode.getRCVD_VECTOR().put(key, 0);
+		}
+		
+		
 	//	System.out.println("my neighbours: ");
 //		for(Integer key: thisNode.getNeighbours().keySet()){
 //			System.out.print(key+ "  ");

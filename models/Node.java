@@ -1,6 +1,7 @@
 package models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -17,9 +18,39 @@ public class Node implements Serializable{
 	private static int totalFailures;
 	private static int maxNumber;	//maximum number of message that a node needs to send before becoming permanently passive
 	private static int maxPerActive;	//maximum number of neighbours to which messages this node will send
+	private HashMap<Integer, Integer> SENT_VECTOR= new HashMap<Integer, Integer>();
+	private HashMap<Integer, Integer> RCVD_VECTOR= new HashMap<Integer, Integer>();
+	
+	//Checkpoint vector clock
+	private ArrayList<Integer> vectorClock = new ArrayList<Integer>();
+	
 
 	
-	public static int getTotalNodes() {
+	public HashMap<Integer, Integer> getSENT_VECTOR() {
+		return SENT_VECTOR;
+	}
+
+	public void setSENT_VECTOR(HashMap<Integer, Integer> sENT_VECTOR) {
+		SENT_VECTOR = sENT_VECTOR;
+	}
+
+	public HashMap<Integer, Integer> getRCVD_VECTOR() {
+		return RCVD_VECTOR;
+	}
+
+	public void setRCVD_VECTOR(HashMap<Integer, Integer> rCVD_VECTOR) {
+		RCVD_VECTOR = rCVD_VECTOR;
+	}
+
+	public ArrayList<Integer> getVectorClock() {
+		return vectorClock;
+	}
+
+	public void setVectorClock(ArrayList<Integer> vectorClock) {
+		this.vectorClock = vectorClock;
+	}
+
+	public int getTotalNodes() {
 		return totalNodes;
 	}
 
