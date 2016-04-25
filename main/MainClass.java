@@ -1,9 +1,12 @@
 package main;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -25,8 +28,21 @@ public class MainClass {
 	private static boolean isOutgoingChannelSetup = false;
 	private static BlockingQueue<Message> LMqueue = null;
 	private static BlockingQueue<String> MWqueue = null;
-	private static int numberOfSentMessages = 0;
-	private static final int MAX_MSG_NUMBER = 100;//later set number of msg sent using configparser
+	public static int numberOfSentMessages = 0;
+	
+	public synchronized static int getNumberOfSentMessages() {
+		return numberOfSentMessages;
+	}
+
+	public synchronized static void setNumberOfSentMessages(int numberOfSentMessages) {
+		MainClass.numberOfSentMessages = numberOfSentMessages;
+	}
+
+
+	public static FileWriter fileWriter;
+	
+	public static BufferedWriter bw;
+	public static PrintWriter out;
 	
 	public static Node thisNode;
 	private static final Lock _mutex = new ReentrantLock(true);
@@ -48,7 +64,7 @@ public class MainClass {
 		
 		//initialize vector clock
 		for(int i=0;i<thisNode.getTotalNodes();i++){
-			thisNode.getVectorClock().add(0);
+			thisNode.getVectorClock().add(1);
 		}
 		
 		//initialize SEND and RECEIVE vector
@@ -57,6 +73,26 @@ public class MainClass {
 			thisNode.getRCVD_VECTOR().put(key, 0);
 		}
 		
+		
+		String line = "1-";
+		for(Integer value:thisNode.getSENT_VECTOR().values()){
+			line=line+value+" ";
+		}
+		line = line.substring(0, line.length()-1);
+		line=line+"-";
+		for(Integer value:thisNode.getRCVD_VECTOR().values()){
+			line=line+value+" ";
+		}
+		line = line.substring(0, line.length()-1);
+		line=line+"-";
+		for(Integer checkpoint:thisNode.getVectorClock()){
+			line=line+checkpoint+" ";
+		}
+		line = line.substring(0, line.length()-1);
+		line=line+"-";
+		line=line+thisNode.getREBmode();
+		
+		writeOutput(line, false);
 		
 	//	System.out.println("my neighbours: ");
 //		for(Integer key: thisNode.getNeighbours().keySet()){
@@ -130,18 +166,23 @@ public class MainClass {
 				System.out.println("need to do checkpoint protocol stuff(don't need to send messages now)");
 				System.out.println("*********************************************************************");
 			} else {
-				if(numberOfSentMessages < MAX_MSG_NUMBER){
+				_mutex.lock();
+				if(getNumberOfSentMessages() < Node.getMaxNumber()){
 					
 					MWqueue.put("nod");
-					numberOfSentMessages++;
-					System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"number of messages sent by now: "+ numberOfSentMessages + "yo bitches ....");
+					//numberOfSentMessages++;
+					//System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"number of messages sent by now: "+ numberOfSentMessages + "yo bitches ....");
 					
 				}
+				_mutex.unlock();
+				
 				System.out.println("need to do checkpoint protocol stuff (else/still need to send msgs)");
 				System.out.println("*******************************************************************");
 				System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"Main THread wrote [Application_msg] from "+ message.getSourceNode().getNodeId()+ "to MWqueue");
 			}
 		}
+		
+		//fileWriter.close();
 		
 	}
 	
@@ -203,6 +244,19 @@ public class MainClass {
 				System.out.println("exception while ["+thisNode.getNodeId()+"]"+" tries to create socket with "+ key);
 			}
 			}
+		}
+	}
+	
+	public static synchronized void writeOutput(String str, boolean flag){
+		//write to file and exit
+		File file = new File("Checkpoints_"+thisNode.getNodeId()+".out");
+		
+		try {
+			FileWriter fileWriter = new FileWriter(file, true);
+			fileWriter.write(str+"\n");
+			fileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

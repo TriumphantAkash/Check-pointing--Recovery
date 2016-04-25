@@ -1,6 +1,9 @@
 package threads;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -54,6 +57,44 @@ public class WriterThread extends Thread{
 						System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thrad, sending [Application_msg] to : "+ nodeId);
 						//System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thread, the output stream for neighbour : "+ nodeId + "is : ***********"+ MainClass.neighbourOOS.get(nodeId));
 						MainClass.neighbourOOS.get(nodeId).writeObject(msg);
+						int numberSent = MainClass.getNumberOfSentMessages();
+						MainClass.setNumberOfSentMessages(numberSent+1);
+						
+						//update SENT_VECTOR value with corresponding node id
+						int cur = MainClass.thisNode.getSENT_VECTOR().get(nodeId);
+						cur++;
+						MainClass.thisNode.getSENT_VECTOR().put(nodeId, cur);
+						
+						//update my check-pointing vector clock after sending message
+						int cur_vc = MainClass.thisNode.getVectorClock().get(MainClass.thisNode.getNodeId());
+						cur_vc++;
+						MainClass.thisNode.getVectorClock().set(MainClass.thisNode.getNodeId(), cur_vc);
+						
+						//take checkpoint
+						String line=cur_vc+"-";
+						for(Integer value:MainClass.thisNode.getSENT_VECTOR().values()){
+							line=line+value+" ";
+						}
+						line = line.substring(0, line.length()-1);
+						line=line+"-";
+						for(Integer value:MainClass.thisNode.getRCVD_VECTOR().values()){
+							line=line+value+" ";
+						}
+						line = line.substring(0, line.length()-1);
+						line=line+"-";
+						for(Integer checkpoint:MainClass.thisNode.getVectorClock()){
+							line=line+checkpoint+" ";
+						}
+						line = line.substring(0, line.length()-1);
+						line=line+"-";
+						line=line+MainClass.thisNode.getREBmode();
+						//TESTING PURPOSE
+						line = line+"_MSG_SEND_CHECKPOINT";
+						/////////////
+						
+						MainClass.writeOutput(line, false);
+						
+						
 						Thread.sleep(10);
 					}
 					

@@ -3,6 +3,7 @@ package threads;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
@@ -41,6 +42,55 @@ public class ListenerThread extends Thread{
 						message.setRebMode(models.Message.REBmode.ACTIVE);
 					}
 					
+					////////////////////////////////
+					//update RCVD_VECTOR value with corresponding node id
+					int cur = MainClass.thisNode.getRCVD_VECTOR().get(message.getSourceNode().getNodeId());
+					cur++;
+					MainClass.thisNode.getRCVD_VECTOR().put(message.getSourceNode().getNodeId(), cur);
+					
+					
+					//update my check-pointing vector clock after receiving message
+					
+					ArrayList<Integer> piggyBackedClock = message.getSourceNode().getVectorClock();
+
+					for(int i=0; i<MainClass.thisNode.getTotalNodes();i++){
+						int a = piggyBackedClock.get(i);
+						int b = MainClass.thisNode.getVectorClock().get(i);
+						if(a > b){
+							MainClass.thisNode.getVectorClock().set(i, a);
+						}
+					}
+					//update my check-pointing vector clock after receiving message
+					int cur_vc = MainClass.thisNode.getVectorClock().get(MainClass.thisNode.getNodeId());
+					cur_vc++;
+					MainClass.thisNode.getVectorClock().set(MainClass.thisNode.getNodeId(), cur_vc);
+					
+					
+					//take checkpoint
+					String line=cur_vc+"-";
+					for(Integer value:MainClass.thisNode.getSENT_VECTOR().values()){
+						line=line+value+" ";
+					}
+					line = line.substring(0, line.length()-1);
+					line=line+"-";
+					for(Integer value:MainClass.thisNode.getRCVD_VECTOR().values()){
+						line=line+value+" ";
+					}
+					line = line.substring(0, line.length()-1);
+					line=line+"-";
+					for(Integer checkpoint:MainClass.thisNode.getVectorClock()){
+						line=line+checkpoint+" ";
+					}
+					line = line.substring(0, line.length()-1);
+					line=line+"-";
+					line=line+MainClass.thisNode.getREBmode();
+					
+					//TESTING PURPOSE
+					line = line+"_MSG_RCV_CHECKPOINT";
+					/////////////
+					
+					MainClass.writeOutput(line, false);
+					/////////////////////////////////
 					_mutex.unlock();
 					
 					queue.put(message);

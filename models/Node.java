@@ -26,117 +26,119 @@ public class Node implements Serializable{
 	
 
 	
-	public HashMap<Integer, Integer> getSENT_VECTOR() {
+	public synchronized HashMap<Integer, Integer> getSENT_VECTOR() {
 		return SENT_VECTOR;
 	}
 
-	public void setSENT_VECTOR(HashMap<Integer, Integer> sENT_VECTOR) {
+	public synchronized void setSENT_VECTOR(HashMap<Integer, Integer> sENT_VECTOR) {
 		SENT_VECTOR = sENT_VECTOR;
 	}
 
-	public HashMap<Integer, Integer> getRCVD_VECTOR() {
+	public synchronized HashMap<Integer, Integer> getRCVD_VECTOR() {
 		return RCVD_VECTOR;
 	}
 
-	public void setRCVD_VECTOR(HashMap<Integer, Integer> rCVD_VECTOR) {
+	public synchronized void setRCVD_VECTOR(HashMap<Integer, Integer> rCVD_VECTOR) {
 		RCVD_VECTOR = rCVD_VECTOR;
 	}
 
-	public ArrayList<Integer> getVectorClock() {
+	public synchronized ArrayList<Integer> getVectorClock() {
 		return vectorClock;
 	}
 
-	public void setVectorClock(ArrayList<Integer> vectorClock) {
+	public synchronized void setVectorClock(ArrayList<Integer> vectorClock) {
 		this.vectorClock = vectorClock;
 	}
 
-	public int getTotalNodes() {
+	public synchronized int getTotalNodes() {
 		return totalNodes;
 	}
 
-	public static void setTotalNodes(int totalNodes) {
+	public synchronized static void setTotalNodes(int totalNodes) {
 		Node.totalNodes = totalNodes;
 	}
 
-	public static int getTotalFailures() {
+	public synchronized static int getTotalFailures() {
 		return totalFailures;
 	}
 
-	public static void setTotalFailures(int totalFailures) {
+	public synchronized static void setTotalFailures(int totalFailures) {
 		Node.totalFailures = totalFailures;
 	}
+	
+	
+		public synchronized static int getMaxNumber() {
+			return maxNumber;
+		}
+	
+		public synchronized static void setMaxNumber(int maxNumber) {
+			Node.maxNumber = maxNumber;
+		}
 
-	public static int getMaxNumber() {
-		return maxNumber;
-	}
 
-	public static void setMaxNumber(int maxNumber) {
-		Node.maxNumber = maxNumber;
-	}
-
-	public static int getMaxPerActive() {
+	public synchronized static int getMaxPerActive() {
 		return maxPerActive;
 	}
 
-	public static void setMaxPerActive(int maxPerActive) {
+	public synchronized static void setMaxPerActive(int maxPerActive) {
 		Node.maxPerActive = maxPerActive;
 	}
 	
-	public HashMap<Integer, Node> getNeighbours() {
+	public synchronized HashMap<Integer, Node> getNeighbours() {
 		return neighbours;
 	}
 
-	public void setNeighbours(HashMap<Integer, Node> neighbours) {
+	public synchronized void setNeighbours(HashMap<Integer, Node> neighbours) {
 		this.neighbours = neighbours;
 	}
 
-	public int getNodeId() {
+	public synchronized int getNodeId() {
 		return nodeId;
 	}
 
-	public void setNodeId(int nodeId) {
+	public synchronized void setNodeId(int nodeId) {
 		this.nodeId = nodeId;
 	}
 
-	public REBmode getREBmode(){
+	public synchronized REBmode getREBmode(){
 		return rebMode;
 	}
 	
-	public void setREBmode(REBmode rebMode){
+	public synchronized void setREBmode(REBmode rebMode){
 		this.rebMode = rebMode;
 	}
 	
-	public String getHostName() {
+	public synchronized String getHostName() {
 		return hostName;
 	}
 
 
 
-	public void setHostName(String hostName) {
+	public synchronized void setHostName(String hostName) {
 		this.hostName = hostName;
 	}
 
 
 
-	public int getPort() {
+	public synchronized int getPort() {
 		return port;
 	}
 
 
 
-	public void setPort(int port) {
+	public synchronized void setPort(int port) {
 		this.port = port;
 	}
 
 
 
-	public int getTotalMessageSent() {
+	public synchronized int getTotalMessageSent() {
 		return totalMessageSent;
 	}
 
 
 
-	public void setTotalMessageSent(int totalMessageSent) {
+	public synchronized void setTotalMessageSent(int totalMessageSent) {
 		this.totalMessageSent = totalMessageSent;
 	}
 
