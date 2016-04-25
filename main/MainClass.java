@@ -10,13 +10,17 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.security.auth.login.FailedLoginException;
+
 import utilities.ConfigParser;
+import models.FilureEvent;
 import models.Message;
 import models.Node;
 import models.Node.REBmode;
@@ -29,7 +33,24 @@ public class MainClass {
 	private static BlockingQueue<Message> LMqueue = null;
 	private static BlockingQueue<String> MWqueue = null;
 	public static int numberOfSentMessages = 0;
+	private static int totalNodes;
+	private static int totalFailures;
+	private static int maxNumber;	//maximum number of message that a node needs to send before becoming permanently passive
+	private static int maxPerActive;	//maximum number of neighbours to which messages this node will send
+	public static ArrayList<FilureEvent> filureEvents = new ArrayList<FilureEvent>();
 	
+	public static boolean recoveryMode = false;
+	public static ArrayList<Integer> rmlist = new ArrayList<Integer>();
+	public static int recoveryModeInitiator;
+	
+	public static ArrayList<FilureEvent> getFilureEvents() {
+		return filureEvents;
+	}
+
+	public static void setFilureEvents(ArrayList<FilureEvent> filureEvents) {
+		MainClass.filureEvents = filureEvents;
+	}
+
 	public synchronized static int getNumberOfSentMessages() {
 		return numberOfSentMessages;
 	}
@@ -63,7 +84,7 @@ public class MainClass {
 		ConfigParser.readConfig(f);
 		
 		//initialize vector clock
-		for(int i=0;i<thisNode.getTotalNodes();i++){
+		for(int i=0;i<MainClass.getTotalNodes();i++){
 			thisNode.getVectorClock().add(1);
 		}
 		
@@ -163,11 +184,10 @@ public class MainClass {
 			Message message = LMqueue.take();
 			System.out.println("["+MainClass.thisNode.getNodeId()+"]"+"Main Thread read [Application_msg] from source"+ message.getSourceNode().getNodeId() + "from LMqueue");
 			if(message.getRebMode() == Message.REBmode.ACTIVE){
-				System.out.println("need to do checkpoint protocol stuff(don't need to send messages now)");
-				System.out.println("*********************************************************************");
+				
 			} else {
 				_mutex.lock();
-				if(getNumberOfSentMessages() < Node.getMaxNumber()){
+				if(getNumberOfSentMessages() < MainClass.getMaxNumber()){
 					
 					MWqueue.put("nod");
 					//numberOfSentMessages++;
@@ -259,4 +279,39 @@ public class MainClass {
 			e.printStackTrace();
 		}
 	}
+	
+	public synchronized static int getTotalNodes() {
+		return totalNodes;
+	}
+
+	public synchronized static void setTotalNodes(int totalNodes1) {
+		totalNodes = totalNodes1;
+	}
+
+	public synchronized static int getTotalFailures() {
+		return totalFailures;
+	}
+
+	public synchronized static void setTotalFailures(int totalFailures1) {
+		totalFailures = totalFailures1;
+	}
+	
+	
+		public synchronized static int getMaxNumber() {
+			return maxNumber;
+		}
+	
+		public synchronized static void setMaxNumber(int maxNumber1) {
+			maxNumber = maxNumber1;
+		}
+
+
+	public synchronized static int getMaxPerActive() {
+		return maxPerActive;
+	}
+
+	public synchronized static void setMaxPerActive(int maxPerActive1) {
+		maxPerActive = maxPerActive1;
+	}
+	
 }

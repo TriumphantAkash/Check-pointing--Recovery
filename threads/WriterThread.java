@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
@@ -13,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import main.MainClass;
 import models.Message;
+import models.Node;
 import models.Node.REBmode;
 
 public class WriterThread extends Thread{
@@ -109,6 +111,35 @@ public class WriterThread extends Thread{
 						System.out.println("Something fishy going on baby...");
 					}
 					_mutex.unlock();
+					
+				} else if(str.equals("rm")){
+					//sending recovery mode message to my neighbours
+					//create application message
+					Message msg = new Message();
+					msg.setSourceNode(MainClass.thisNode);
+					msg.setMessage("rm");
+					
+					for(Entry<Integer, Node> e: MainClass.thisNode.getNeighbours().entrySet()){
+						msg.setDestinationNode(e.getValue());
+						MainClass.neighbourOOS.get(e.getKey()).writeObject(msg);
+					}
+					
+				} else if(str.equals("rminit")){
+					//send rms to initiator
+					Message msg = new Message();
+					msg.setSourceNode(MainClass.thisNode);
+					msg.setMessage("rms");
+					//msg.setDestinationNode(MainClass.thisNode.getNeighbours(MainClass.recoveryModeInitiator));
+					MainClass.neighbourOOS.get(MainClass.recoveryModeInitiator).writeObject(msg);
+					
+				} else if(str.startsWith("rm-")){
+					//send rms to source
+					Message msg = new Message();
+					msg.setSourceNode(MainClass.thisNode);
+					msg.setMessage("rms");
+					String[] n = str.split("-");
+					int sendTo = Integer.parseInt(n[1]);
+					MainClass.neighbourOOS.get(sendTo).writeObject(msg);
 					
 				}
 			} catch (InterruptedException | IOException e) {

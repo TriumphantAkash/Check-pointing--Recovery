@@ -14,10 +14,7 @@ public class Node implements Serializable{
 	private REBmode rebMode = REBmode.PASSIVE;
 	private int totalMessageSent;
 	private HashMap<Integer, Node> neighbours = new HashMap<Integer, Node>();
-	private static int totalNodes;
-	private static int totalFailures;
-	private static int maxNumber;	//maximum number of message that a node needs to send before becoming permanently passive
-	private static int maxPerActive;	//maximum number of neighbours to which messages this node will send
+	
 	private HashMap<Integer, Integer> SENT_VECTOR= new HashMap<Integer, Integer>();
 	private HashMap<Integer, Integer> RCVD_VECTOR= new HashMap<Integer, Integer>();
 	
@@ -48,40 +45,6 @@ public class Node implements Serializable{
 
 	public synchronized void setVectorClock(ArrayList<Integer> vectorClock) {
 		this.vectorClock = vectorClock;
-	}
-
-	public synchronized int getTotalNodes() {
-		return totalNodes;
-	}
-
-	public synchronized static void setTotalNodes(int totalNodes) {
-		Node.totalNodes = totalNodes;
-	}
-
-	public synchronized static int getTotalFailures() {
-		return totalFailures;
-	}
-
-	public synchronized static void setTotalFailures(int totalFailures) {
-		Node.totalFailures = totalFailures;
-	}
-	
-	
-		public synchronized static int getMaxNumber() {
-			return maxNumber;
-		}
-	
-		public synchronized static void setMaxNumber(int maxNumber) {
-			Node.maxNumber = maxNumber;
-		}
-
-
-	public synchronized static int getMaxPerActive() {
-		return maxPerActive;
-	}
-
-	public synchronized static void setMaxPerActive(int maxPerActive) {
-		Node.maxPerActive = maxPerActive;
 	}
 	
 	public synchronized HashMap<Integer, Node> getNeighbours() {

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import main.MainClass;
+import models.FilureEvent;
 import models.Node;
 
 public class ConfigParser {
@@ -21,13 +22,13 @@ public class ConfigParser {
 		String line = br.readLine();
 		String[] words = line.split("\\s+");
 		
-		MainClass.thisNode.setTotalNodes(Integer.parseInt(words[0]));
-		MainClass.thisNode.setTotalFailures(Integer.parseInt(words[1]));
-		MainClass.thisNode.setMaxNumber(Integer.parseInt(words[2]));
-		MainClass.thisNode.setMaxPerActive(Integer.parseInt(words[3]));
+		MainClass.setTotalNodes(Integer.parseInt(words[0]));
+		MainClass.setTotalFailures(Integer.parseInt(words[1]));
+		MainClass.setMaxNumber(Integer.parseInt(words[2]));
+		MainClass.setMaxPerActive(Integer.parseInt(words[3]));
 
 		HashMap<Integer, Node> tempHashMap = new HashMap<Integer, Node>();
-		for(int i = 1;i<=MainClass.thisNode.getTotalNodes();i++){
+		for(int i = 1;i<=MainClass.getTotalNodes(); i++){
 			String line1 = br.readLine();
 			String[] words1 = line1.split("\\s+");
 			
@@ -54,7 +55,6 @@ public class ConfigParser {
 		}
 		
 		//now the next line will read the neighbours of current node
-		
 		String line3 = br.readLine();
 		String[] words3 = line3.split("\\s+");
 		
@@ -64,5 +64,14 @@ public class ConfigParser {
 		//now my neighbour's information is updated
 		
 		//there is some more stuff need to be parsed while doing part 3 of this project
+		for(int i = 1; i <=(MainClass.getTotalNodes() - MainClass.thisNode.getNodeId() - 1); i++){
+			String line4 = br.readLine();
+		}
+		
+		for(int i=0; i<MainClass.getTotalFailures(); i++){
+			String event = br.readLine();
+			String[] events = event.split("\\s+");
+			MainClass.getFilureEvents().add(new FilureEvent(Integer.parseInt(events[0]), Integer.parseInt(events[0])));
+		}
 	}
 }

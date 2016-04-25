@@ -53,7 +53,7 @@ public class ListenerThread extends Thread{
 					
 					ArrayList<Integer> piggyBackedClock = message.getSourceNode().getVectorClock();
 
-					for(int i=0; i<MainClass.thisNode.getTotalNodes();i++){
+					for(int i=0; i<MainClass.getTotalNodes();i++){
 						int a = piggyBackedClock.get(i);
 						int b = MainClass.thisNode.getVectorClock().get(i);
 						if(a > b){
