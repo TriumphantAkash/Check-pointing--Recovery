@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeMap;
 
 import models.Message.REBmode;
 
@@ -15,27 +16,27 @@ public class Node implements Serializable{
 	private int totalMessageSent;
 	private HashMap<Integer, Node> neighbours = new HashMap<Integer, Node>();
 	
-	private HashMap<Integer, Integer> SENT_VECTOR= new HashMap<Integer, Integer>();
-	private HashMap<Integer, Integer> RCVD_VECTOR= new HashMap<Integer, Integer>();
+	private TreeMap<Integer, Integer> SENT_VECTOR= new TreeMap<Integer, Integer>();
+	private TreeMap<Integer, Integer> RCVD_VECTOR= new TreeMap<Integer, Integer>();
 	
 	//Checkpoint vector clock
 	private ArrayList<Integer> vectorClock = new ArrayList<Integer>();
 	
 
 	
-	public synchronized HashMap<Integer, Integer> getSENT_VECTOR() {
+	public synchronized TreeMap<Integer, Integer> getSENT_VECTOR() {
 		return SENT_VECTOR;
 	}
 
-	public synchronized void setSENT_VECTOR(HashMap<Integer, Integer> sENT_VECTOR) {
+	public synchronized void setSENT_VECTOR(TreeMap<Integer, Integer> sENT_VECTOR) {
 		SENT_VECTOR = sENT_VECTOR;
 	}
 
-	public synchronized HashMap<Integer, Integer> getRCVD_VECTOR() {
+	public synchronized TreeMap<Integer, Integer> getRCVD_VECTOR() {
 		return RCVD_VECTOR;
 	}
 
-	public synchronized void setRCVD_VECTOR(HashMap<Integer, Integer> rCVD_VECTOR) {
+	public synchronized void setRCVD_VECTOR(TreeMap<Integer, Integer> rCVD_VECTOR) {
 		RCVD_VECTOR = rCVD_VECTOR;
 	}
 

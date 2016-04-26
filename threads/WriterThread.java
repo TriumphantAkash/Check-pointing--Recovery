@@ -33,6 +33,7 @@ public class WriterThread extends Thread{
 				
 				int r = 0;
 				if(str.equals("nod")){
+					
 					//1) generate random number to pick number of neighbours to send application msg to (suppose this ransom # is r)
 					int n = MainClass.thisNode.getNeighbours().size();
 					Random rand = new Random();
@@ -55,49 +56,54 @@ public class WriterThread extends Thread{
 					
 					//take first r nodeIds from list and send application msg to them					
 					for(int i = 0; i<r;i++){
-						int nodeId = list.get(i);
-						System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thrad, sending [Application_msg] to : "+ nodeId);
-						//System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thread, the output stream for neighbour : "+ nodeId + "is : ***********"+ MainClass.neighbourOOS.get(nodeId));
-						MainClass.neighbourOOS.get(nodeId).writeObject(msg);
-						int numberSent = MainClass.getNumberOfSentMessages();
-						MainClass.setNumberOfSentMessages(numberSent+1);
-						
-						//update SENT_VECTOR value with corresponding node id
-						int cur = MainClass.thisNode.getSENT_VECTOR().get(nodeId);
-						cur++;
-						MainClass.thisNode.getSENT_VECTOR().put(nodeId, cur);
-						
-						//update my check-pointing vector clock after sending message
-						int cur_vc = MainClass.thisNode.getVectorClock().get(MainClass.thisNode.getNodeId());
-						cur_vc++;
-						MainClass.thisNode.getVectorClock().set(MainClass.thisNode.getNodeId(), cur_vc);
-						
-						//take checkpoint
-						String line=cur_vc+"-";
-						for(Integer value:MainClass.thisNode.getSENT_VECTOR().values()){
-							line=line+value+" ";
+						if(!MainClass.isRecoveryMode()){
+							int nodeId = list.get(i);
+							System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thrad, sending [Application_msg] to : "+ nodeId);
+							//System.out.println("["+MainClass.thisNode.getNodeId()+"]"+" in Writer Thread, the output stream for neighbour : "+ nodeId + "is : ***********"+ MainClass.neighbourOOS.get(nodeId));
+							MainClass.getNeighbourOOS().get(nodeId).writeObject(msg);
+							int numberSent = MainClass.getNumberOfSentMessages();
+							MainClass.setNumberOfSentMessages(numberSent+1);
+							
+							//update SENT_VECTOR value with corresponding node id
+							int cur = MainClass.thisNode.getSENT_VECTOR().get(nodeId);
+							cur++;
+							MainClass.thisNode.getSENT_VECTOR().put(nodeId, cur);
+							
+							//update my check-pointing vector clock after sending message
+							int cur_vc = MainClass.thisNode.getVectorClock().get(MainClass.thisNode.getNodeId());
+							cur_vc++;
+							MainClass.thisNode.getVectorClock().set(MainClass.thisNode.getNodeId(), cur_vc);
+							
+							//take checkpoint
+							String line=cur_vc+"-";
+							for(Integer value:MainClass.thisNode.getSENT_VECTOR().values()){
+								line=line+value+" ";
+							}
+							
+							line = line.substring(0, line.length()-1);
+							line=line+"-";
+							for(Integer value:MainClass.thisNode.getRCVD_VECTOR().values()){
+								line=line+value+" ";
+							}
+							line = line.substring(0, line.length()-1);
+							line=line+"-";
+							for(Integer checkpoint:MainClass.thisNode.getVectorClock()){
+								line=line+checkpoint+" ";
+							}
+							line = line.substring(0, line.length()-1);
+							line=line+"-";
+							line=line+MainClass.thisNode.getREBmode();
+							//TESTING PURPOSE
+							line = line+"_MSG_SEND_CHECKPOINT";
+							/////////////
+							
+							MainClass.writeOutput(line, false);
+							
+							
+							Thread.sleep(10);
+						}else {
+							break;
 						}
-						line = line.substring(0, line.length()-1);
-						line=line+"-";
-						for(Integer value:MainClass.thisNode.getRCVD_VECTOR().values()){
-							line=line+value+" ";
-						}
-						line = line.substring(0, line.length()-1);
-						line=line+"-";
-						for(Integer checkpoint:MainClass.thisNode.getVectorClock()){
-							line=line+checkpoint+" ";
-						}
-						line = line.substring(0, line.length()-1);
-						line=line+"-";
-						line=line+MainClass.thisNode.getREBmode();
-						//TESTING PURPOSE
-						line = line+"_MSG_SEND_CHECKPOINT";
-						/////////////
-						
-						MainClass.writeOutput(line, false);
-						
-						
-						Thread.sleep(10);
 					}
 					
 					_mutex.lock();
@@ -141,7 +147,16 @@ public class WriterThread extends Thread{
 					int sendTo = Integer.parseInt(n[1]);
 					MainClass.neighbourOOS.get(sendTo).writeObject(msg);
 					
+				} else if(str.startsWith("recovery")){
+					Message msg = new Message();
+					msg.setSourceNode(MainClass.thisNode);
+					
+					for(Entry<Integer, Integer> entry: MainClass.thisNode.getSENT_VECTOR().entrySet()){
+						msg.setMessage("recovery-"+entry.getValue());
+						MainClass.getNeighbourOOS().get(entry.getKey()).writeObject(msg);
+					}
 				}
+				
 			} catch (InterruptedException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
